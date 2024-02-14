@@ -3,18 +3,23 @@ from typing import Annotated, List
 from sqlalchemy import Float
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, PydanticUserError
-from .database import SessionLocal, engine
-from . import models
+from database import SessionLocal, engine
+import models
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
 origin = [
-    'http://localhost:3000'
+    "http://localhost:3000"
 ]
 
-app.add_middleware(CORSMiddleware,
-                   allow_origins = origin)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = origin,
+    allow_credentials = True,
+    allow_methods = '*',
+    allow_headers = ['*']
+    )
 
 
 class TransactionBase(BaseModel):
