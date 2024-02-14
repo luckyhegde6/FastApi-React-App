@@ -3,7 +3,7 @@ import api from './api'
 
 const App = () => {
   const [transactions, setTransactions] = useState([]);
-  const [formData,setFormData] = useState({
+  const [formData, setFormData] = useState({
     amount : '',
     category:'',
     description: '',
@@ -14,11 +14,12 @@ const App = () => {
   const fetchTransaction = async () => {
     const response = await api.get('/transactions');
     setTransactions(response.data)
+    // console.table(response.data)
   };
 
   useEffect(() => {
     fetchTransaction();
-  },[]);
+  }, []);
 
   const handleInputChange = (event) => {
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
@@ -89,6 +90,36 @@ const App = () => {
           Submit
           </button>
       </form>
+
+
+      <table className='table table-striped table-bordered table-hover'>
+        <thead>
+          <tr>
+            <th> Amount </th>
+
+            <th> Category </th>
+
+            <th> Description </th>
+
+            <th> Income ? </th>
+
+            <th> Date </th>
+
+          </tr>
+        </thead>
+        <tbody>
+          {transactions.map((transaction) => {
+            console.log(transaction);
+            <tr key={transaction.id}>
+              <td>{transaction.amount}</td>
+              <td>{transaction.category}</td>
+              <td>{transaction.description}</td>
+              <td>{transaction.is_income? 'Yes' : 'No'}</td>
+              <td>{transaction.date}</td>
+            </tr>
+          })}
+        </tbody>
+      </table>
     </div> 
 </div>
   )
