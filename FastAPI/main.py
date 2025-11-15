@@ -1,60 +1,97 @@
-from fastapi import FastAPI, HTTPException, Depends
-from typing import Annotated, List
-from sqlalchemy import Float
-from sqlalchemy.orm import Session
-from pydantic import BaseModel, PydanticUserError
-from database import SessionLocal, engine
-import models
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from database import engine, Base, SessionLocal
+from config import settings
+from routers import transactions, categories
+from models import Category
 
-app = FastAPI()
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
-origin = [
-    "http://localhost:3000"
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins = origin,
-    allow_credentials = True,
-    allow_methods = ['*'],
-    allow_headers = ['*']
-    )
-
-
-class TransactionBase(BaseModel):
-    amount: float
-    category: str
-    description: str
-    is_income: bool
-    date: str
-
-class TransactionModel(TransactionBase):
-    id: int
-
-    class Config:
-        from_attributes = True
-
-def get_db():
+# Seed default categories
+def seed_default_categories():
+    """Seed default categories if they don't exist."""
+    from sqlalchemy.orm import Session
     db = SessionLocal()
     try:
-        yield db
+        # Default expense categories
+        expense_categories = [
+            {"name": "Food", "description": "Groceries and dining out", "is_income": False},
+            {"name": "Transport", "description": "Transportation costs", "is_income": False},
+            {"name": "Shopping", "description": "Shopping and retail", "is_income": False},
+            {"name": "Bills", "description": "Utility bills and subscriptions", "is_income": False},
+            {"name": "Entertainment", "description": "Movies, games, and leisure", "is_income": False},
+            {"name": "Healthcare", "description": "Medical expenses", "is_income": False},
+            {"name": "Education", "description": "Educational expenses", "is_income": False},
+            {"name": "Other", "description": "Miscellaneous expenses", "is_income": False},
+        ]
+        
+        # Default income categories
+        income_categories = [
+            {"name": "Salary", "description": "Monthly salary", "is_income": True},
+            {"name": "Freelance", "description": "Freelance work income", "is_income": True},
+            {"name": "Investment", "description": "Investment returns", "is_income": True},
+            {"name": "Gift", "description": "Gifts received", "is_income": True},
+            {"name": "Other Income", "description": "Other income sources", "is_income": True},
+        ]
+        
+        # Add expense categories
+        for cat_data in expense_categories:
+            existing = db.query(Category).filter(Category.name == cat_data["name"]).first()
+            if not existing:
+                category = Category(**cat_data, is_default=True)
+                db.add(category)
+        
+        # Add income categories
+        for cat_data in income_categories:
+            existing = db.query(Category).filter(Category.name == cat_data["name"]).first()
+            if not existing:
+                category = Category(**cat_data, is_default=True)
+                db.add(category)
+        
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Error seeding categories: {e}")
     finally:
         db.close()
 
-db_dependency = Annotated[Session, Depends(get_db)]
+# Seed categories on startup
+seed_default_categories()
 
-models.Base.metadata.create_all(bind=engine)
+# Initialize FastAPI app
+app = FastAPI(
+    title=settings.api_title,
+    version=settings.api_version,
+    description=settings.api_description,
+    debug=settings.debug
+)
 
-@app.post("/transactions/", response_model=TransactionModel)
-async def create_transaction(transaction:TransactionBase, db: db_dependency):
-    db_transaction = models.Transaction(**transaction.model_dump())
-    db.add(db_transaction)
-    db.commit()
-    db.refresh(db_transaction)
-    return db_transaction
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/transactions", response_model=List[TransactionModel])
-async def read_transaction(db: db_dependency, skip: int =0, limit: int = 100):
-    transactions = db.query(models.Transaction).offset(skip).limit(limit).all()
-    return transactions
+# Include routers
+app.include_router(transactions.router)
+app.include_router(categories.router)
+
+
+@app.get("/")
+async def root():
+    """Root endpoint."""
+    return {
+        "message": "Welcome to Finance API",
+        "version": settings.api_version,
+        "docs": "/docs"
+    }
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy"}
