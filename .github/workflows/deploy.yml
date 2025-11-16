@@ -66,6 +66,9 @@ jobs:
         env:
           DATABASE_URL: sqlite:///./finance.db
 
+      - name: Install dependencies (frontend)
+        run: cd React/finance-app && npm install
+
       - name: Build React app
         run: cd React/finance-app && npm run build
 
@@ -80,4 +83,5 @@ jobs:
 permissions:
   pages: write      # to deploy to Pages
   id-token: write   # to verify the deployment originates from our repository
+
 
