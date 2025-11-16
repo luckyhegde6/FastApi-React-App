@@ -88,7 +88,7 @@ jobs:
           git init
           git remote add origin https://github.com/luckyhegde6/FastApi-React-App.git
           git checkout -b gh-pages
-          git add .\
+          git add .
           git commit -m "Deploy to GitHub Pages"
           git push --force --quiet origin gh-pages
 
