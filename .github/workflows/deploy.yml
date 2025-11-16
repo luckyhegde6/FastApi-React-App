@@ -1,8 +1,8 @@
+# yaml .github/workflows/deploy.yml
 name: Deploy to GitHub Pages
 
 on:
   push:
-
     branches: [main]
 
 jobs:
@@ -29,7 +29,7 @@ jobs:
       - name: Start backend
         run: |
           cd FastAPI
-          nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &\
           sleep 5  # Give the backend some time to start
         env:
           DATABASE_URL: sqlite:///./finance.db
@@ -61,27 +61,37 @@ jobs:
       - name: Start backend (for deployment)
         run: |
           cd FastAPI
-          nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &\
           sleep 5  # Give the backend some time to start
         env:
           DATABASE_URL: sqlite:///./finance.db
-
-      - name: Install dependencies (frontend)
-        run: cd React/finance-app && npm install
 
       - name: Build React app
         run: cd React/finance-app && npm run build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
+          name: react-app-artifact
+          path: React/finance-app/dist
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: react-app-artifact
           path: React/finance-app/dist
 
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v2
+        run: |
+          echo '${{ secrets.GITHUB_TOKEN }}' | gh auth login --with-token
+          cd React/finance-app/dist
+          git init
+          git remote add origin https://github.com/luckyhegde6/FastApi-React-App.git
+          git checkout -b gh-pages
+          git add .\
+          git commit -m "Deploy to GitHub Pages"
+          git push --force --quiet origin gh-pages
 
 permissions:
   pages: write      # to deploy to Pages
   id-token: write   # to verify the deployment originates from our repository
-
-
