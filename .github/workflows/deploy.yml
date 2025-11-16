@@ -2,6 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
+
     branches: [main]
 
 jobs:
@@ -79,3 +80,4 @@ jobs:
 permissions:
   pages: write      # to deploy to Pages
   id-token: write   # to verify the deployment originates from our repository
+
