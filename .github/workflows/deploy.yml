@@ -1,4 +1,3 @@
-# yaml .github/workflows/deploy.yml
 name: Deploy to GitHub Pages
 
 on:
@@ -52,8 +51,19 @@ jobs:
         with:
           node-version: 20 # Or your preferred version
 
-      - name: Install dependencies
+      - name: Install dependencies (frontend)
         run: cd React/finance-app && npm install
+
+      - name: Install dependencies (backend)
+        run: cd FastAPI && pip install -r requirements.txt
+
+      - name: Start backend (for deployment)
+        run: |
+          cd FastAPI
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+          sleep 5  # Give the backend some time to start
+        env:
+          DATABASE_URL: sqlite:///./finance.db
 
       - name: Build React app
         run: cd React/finance-app && npm run build
