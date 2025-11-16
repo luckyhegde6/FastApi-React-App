@@ -254,6 +254,27 @@ npm run preview
    npm run e2e:ui
    ```
 
+## End-to-end tests (Playwright)
+
+This repo includes Playwright E2E specs under `React/finance-app/e2e` and a Playwright config at `React/finance-app/playwright.config.js`.
+
+### Prerequisites
+- Node & npm (for frontend & Playwright)
+- Python & pip (for backend FastAPI)
+- Playwright browsers installed at least once:
+  - From `React/finance-app` run:
+    ```bash
+    cd React/finance-app
+    npx playwright install
+    ```
+- Ensure `start-app.bat`/`start-app.sh` work on your platform (they start backend and frontend services).
+
+### Quick run (Windows)
+From the repo root (cmd.exe):
+```cmd
+run-e2e.bat
+```
+
 ## 📁 Project Structure
 
 ```

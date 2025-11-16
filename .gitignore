@@ -296,3 +296,40 @@ cython_debug/
 #.idea/
 
 finance.db
+
+# Playwright artifacts
+React/finance-app/playwright-report/
+React/finance-app/test-results/
+.react-playwright/      # personal / plugin dirs
+.playwright/            # Playwright browser/cache directory
+playwright-report/      # html report output
+test-results/           # Playwright JSON reports / traces
+playwright-report.zip
+trace.zip
+# Playwright test media
+**/playwright-report/**/screenshots/
+**/playwright-report/**/videos/
+**/test-results/**/screenshots/
+**/test-results/**/videos/
+
+# Playwright traces / recordings
+*.zip
+*.har
+
+# Vitest / coverage artifacts (frontend)
+coverage/
+coverage-frontend/
+.vitest/
+.vitest/*
+
+# nyc/istanbul (if used)
+.nyc_output/
+
+# local node test logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# local Playwright config debug/verification files
+verify-setup.log

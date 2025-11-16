@@ -1,7 +1,15 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
 
+import os
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent
+# Default DB (example) — keep your existing default here
+DEFAULT_DB = f"sqlite:///{BASE_DIR / 'finance.db'}"
+
+DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_DB)
+FASTAPI_TESTING = os.getenv("FASTAPI_TESTING", "0") in ("1", "true", "True")
 class Settings(BaseSettings):
     """Application settings."""
     

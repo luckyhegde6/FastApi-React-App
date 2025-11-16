@@ -28,8 +28,12 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:3000',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+     headless: true,
+    // store traces/videos on failures
     trace: 'on-first-retry',
+    video: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
   },
 
   /* Configure projects for major browsers */
@@ -39,15 +43,15 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
   ],
 
   /* Run your local dev server before starting the tests */
