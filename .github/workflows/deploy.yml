@@ -60,9 +60,7 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
-          artifact-dir: dist
-        working-directory: React/finance-app
-
+          artifact-dir: React/finance-app/dist
 permissions:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from our repository
