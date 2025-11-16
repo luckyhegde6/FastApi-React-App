@@ -1,3 +1,4 @@
+# yaml .github/workflows/deploy.yml
 name: Deploy to GitHub Pages
 
 on:
@@ -22,6 +23,9 @@ jobs:
       - name: Install dependencies (backend)
         run: cd FastAPI && pip install -r requirements.txt
 
+      - name: Install Playwright browsers
+        run: cd React/finance-app && npx playwright install
+
       - name: Start backend
         run: |
           cd FastAPI
@@ -29,9 +33,6 @@ jobs:
           sleep 5  # Give the backend some time to start
         env:
           DATABASE_URL: sqlite:///./finance.db
-
-      - name: Install Playwright browsers
-        run: cd React/finance-app && npx playwright install
 
       - name: Run end-to-end tests
         run: cd React/finance-app && npm run e2e
@@ -57,11 +58,14 @@ jobs:
       - name: Build React app
         run: cd React/finance-app && npm run build
 
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: React/finance-app/dist
+
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
-        with:
-          artifact-dir: React/finance-app/dist
-permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from our repository
 
+permissions:
+  pages: write      # to deploy to Pages
+  id-token: write   # to verify the deployment originates from our repository
