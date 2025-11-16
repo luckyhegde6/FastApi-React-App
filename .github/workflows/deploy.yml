@@ -14,15 +14,27 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18 # Or your preferred version
+          node-version: 20 # Or your preferred version
 
-      - name: Install dependencies
+      - name: Install dependencies (frontend)
         run: cd React/finance-app && npm install
+
+      - name: Install dependencies (backend)
+        run: cd FastAPI && pip install -r requirements.txt
+
+      - name: Start backend
+        run: |
+          cd FastAPI
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+          sleep 5  # Give the backend some time to start
+        env:
+          DATABASE_URL: sqlite:///./finance.db
 
       - name: Run end-to-end tests
         run: cd React/finance-app && npm run e2e
         env:
           CI: true
+          API_BASE_URL: http://localhost:8000
 
   deploy:
     needs: e2e-tests  # Ensure e2e tests pass before deploying
@@ -34,7 +46,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18 # Or your preferred version
+          node-version: 20 # Or your preferred version
 
       - name: Install dependencies
         run: cd React/finance-app && npm install
