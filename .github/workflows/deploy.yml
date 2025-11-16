@@ -1,9 +1,8 @@
-# yaml .github/workflows/deploy.yml
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main
 
 jobs:
   e2e-tests:
@@ -21,7 +20,7 @@ jobs:
         run: cd React/finance-app && npm install
 
       - name: Run end-to-end tests
-        run: cd React/finance-app && npm run test:e2e
+        run: cd React/finance-app && npm run e2e
         env:
           CI: true
 
@@ -51,3 +50,4 @@ jobs:
 permissions:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from our repository
+
