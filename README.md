@@ -341,6 +341,19 @@ FastApi-React-App/
 
 - `DELETE /transactions/{transaction_id}` - Delete a transaction
 
+### Reports
+
+- `GET /transactions/reports/aggregate` - Get aggregated totals and balance for an optional date range. Query params: `start_date`, `end_date` (YYYY-MM-DD).
+- `GET /transactions/reports/download` - Download transactions for a date range. Query params: `file_type` (csv|pdf), `start_date`, `end_date`.
+
+PDF generation uses `reportlab` for nicely formatted outputs. To enable PDF report generation, install the Python package in the backend virtualenv:
+
+```bash
+pip install reportlab
+```
+
+If `reportlab` is not installed the server will fall back to a simple text-based PDF response.
+
 ### Other Endpoints
 
 - `GET /` - Root endpoint with API information

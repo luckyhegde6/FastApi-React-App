@@ -23,12 +23,27 @@ class TransactionService:
         Raises:
             HTTPException: If category not found
         """
+        # Resolve category: allow passing category name in `category` or category_id
+        if getattr(transaction, 'category_id', None) is None and getattr(transaction, 'category', None):
+            # find or create by name
+            cat = db.query(Category).filter(Category.name == transaction.category).first()
+            if not cat:
+                cat = Category(name=transaction.category, description=None, is_income=transaction.is_income)
+                db.add(cat)
+                db.commit()
+                db.refresh(cat)
+            transaction_dict = transaction.model_dump()
+            transaction_dict['category_id'] = cat.id
+        else:
+            transaction_dict = transaction.model_dump()
+        # Remove any transient 'category' field (name) so SQLAlchemy model doesn't receive unexpected keyword args
+        transaction_dict.pop('category', None)
         # Validate category exists
-        category = db.query(Category).filter(Category.id == transaction.category_id).first()
+        category = db.query(Category).filter(Category.id == transaction_dict.get('category_id')).first()
         if not category:
             raise HTTPException(status_code=404, detail="Category not found")
         
-        db_transaction = Transaction(**transaction.model_dump())
+        db_transaction = Transaction(**transaction_dict)
         db.add(db_transaction)
         db.commit()
         db.refresh(db_transaction)
@@ -54,7 +69,9 @@ class TransactionService:
         skip: int = 0,
         limit: int = 100,
         is_income: Optional[bool] = None,
-        category_id: Optional[int] = None
+        category_id: Optional[int] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
     ) -> List[Transaction]:
         """
         Get list of transactions with optional filters.
@@ -70,14 +87,47 @@ class TransactionService:
             List of transactions
         """
         query = db.query(Transaction)
-        
+
         if is_income is not None:
             query = query.filter(Transaction.is_income == is_income)
-        
+
         if category_id is not None:
             query = query.filter(Transaction.category_id == category_id)
-        
+
+        # Filter by date range if provided (dates stored as YYYY-MM-DD strings)
+        if start_date is not None:
+            query = query.filter(Transaction.date >= start_date)
+        if end_date is not None:
+            query = query.filter(Transaction.date <= end_date)
+
         return query.order_by(Transaction.id.desc()).offset(skip).limit(limit).all()
+
+    @staticmethod
+    def get_transactions_aggregate(
+        db: Session,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
+    ) -> dict:
+        """
+        Return aggregated totals for income and expenses and list of transactions in range.
+        """
+        query = db.query(Transaction)
+        if start_date is not None:
+            query = query.filter(Transaction.date >= start_date)
+        if end_date is not None:
+            query = query.filter(Transaction.date <= end_date)
+
+        transactions = query.order_by(Transaction.id.desc()).all()
+
+        total_income = sum(t.amount for t in transactions if t.is_income)
+        total_expense = sum(t.amount for t in transactions if not t.is_income)
+
+        return {
+            'transactions': transactions,
+            'total_income': total_income,
+            'total_expense': total_expense,
+            'balance': total_income - total_expense
+        }
     
     @staticmethod
     def update_transaction(

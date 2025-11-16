@@ -40,10 +40,11 @@ class TransactionBase(BaseModel):
     """Base schema for transaction data."""
     
     amount: float = Field(..., gt=0, description="Transaction amount (must be positive)")
-    category_id: int = Field(..., description="Category ID")
+    category_id: Optional[int] = None
     description: Optional[str] = Field(None, max_length=500, description="Transaction description")
     is_income: bool = Field(default=False, description="Whether this is an income transaction")
     date: str = Field(..., description="Transaction date (YYYY-MM-DD format)")
+    category: Optional[str] = Field(None, description="Category name (optional, will be used to resolve/create category)")
     
     @field_validator('date')
     @classmethod
@@ -88,7 +89,7 @@ class TransactionResponse(BaseModel):
     id: int
     amount: float
     category_id: int
-    category_name: Optional[str] = None  # Include category name for convenience
+    category: Optional[str] = None  # Category name for convenience
     description: Optional[str]
     is_income: bool
     date: str

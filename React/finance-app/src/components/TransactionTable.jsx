@@ -39,10 +39,10 @@ const TransactionTable = ({ transactions, onEdit, onDelete }) => {
           {transactions.map((transaction) => (
             <tr key={transaction.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                ${transaction.amount.toFixed(2)}
+                <span className={transaction.is_income ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>${transaction.amount.toFixed(2)}</span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {transaction.category_name || `Category ${transaction.category_id}`}
+                {transaction.category || transaction.category_name || `Category ${transaction.category_id}`}
               </td>
               <td className="px-6 py-4 text-sm text-gray-500">
                 {transaction.description || '-'}
@@ -96,6 +96,7 @@ TransactionTable.propTypes = {
       amount: PropTypes.number.isRequired,
       category_id: PropTypes.number.isRequired,
       category_name: PropTypes.string,
+      category: PropTypes.string,
       description: PropTypes.string,
       is_income: PropTypes.bool.isRequired,
       date: PropTypes.string.isRequired,
