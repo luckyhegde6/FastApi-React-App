@@ -10,6 +10,6 @@ updates:
     schedule:
       interval: "monthly"
   - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/Reacr/finance-app/" # Location of package manifests
+    directory: "/React/finance-app/" # Location of package manifests
     schedule:
       interval: "monthly"
